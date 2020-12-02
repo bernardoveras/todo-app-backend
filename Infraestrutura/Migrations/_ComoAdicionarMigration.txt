@@ -1,0 +1,7 @@
+﻿ATENCAO: Compilar a solucao, antes de executar os comandos abaixo.
+
+No Package Manager Console executar: 
+PM> dotnet ef migrations add NOME_DA_MIGRACAO --startup-project ..\Web.Api\
+
+Para atualizar a versão do banco de dados:
+PM> dotnet ef database update --startup-project ..\Web.Api\

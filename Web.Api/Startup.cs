@@ -2,12 +2,14 @@ using Dominio.Handlers;
 using Dominio.Repositories;
 using Infraestrutura.Context;
 using Infraestrutura.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace Web.Api
@@ -23,16 +25,27 @@ namespace Web.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddDbContext<DataContext>(opt => opt.UseInMemoryDatabase("Database"));
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "Web.Api", Version = "v1" }));
+            services.AddControllers();
+
             services.AddDbContext<DataContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            //services.AddDbContext<DataContext>(opt => opt.UseInMemoryDatabase("Database"));
 
             services.AddTransient<ITodoRepository, TodoRepository>();
             services.AddTransient<TodoHandler, TodoHandler>();
 
-            services.AddControllers();
-            services.AddSwaggerGen(c =>
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Web.Api", Version = "v1" });
+                options.Authority = "https://securetoken.google.com/todo-app-d2a0c";
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = "https://securetoken.google.com/todo-app-d2a0c",
+                    ValidateAudience = true,
+                    ValidAudience = "todo-app-d2a0c",
+                    ValidateLifetime = true
+                };
             });
         }
 
